@@ -65,19 +65,19 @@
 <body>
 
     <div class="glass-card">
-        <h1 class="title">✨ Language Detector</h1>
-        <p class="subtitle">Type below to instantly detect the language!</p>
-
-        <textarea id="inputText" class="text-input" placeholder="e.g., Bonjour tout le monde..."></textarea>
-        
-        <button id="submitBtn" class="predict-btn" onclick="detectLanguage()">Detect Language</button>
-
-        <div id="errorBox" class="error-box"></div>
-        
-        <div id="resultBox" class="result-box">
+        <form method="POST">
+            {% csrf_token %}
+            <h1 class="title">✨ Language Detector</h1>
+            <p class="subtitle">Type below to instantly detect the language!</p>
+            <textarea name="text" id="inputText" class="text-input" placeholder="e.g., Bonjour tout le monde..."></textarea>
+            <button id="submitBtn" class="predict-btn" onclick="detectLanguage()">Detect Language</button>
+            <div id="errorBox" class="error-box"></div>
+            <div id="resultBox" class="result-box">
             <span>Predicted Language:</span>
             <span id="predictionText" class="highlight"></span>
-        </div>
+            </div>
+        </form>
+
     </div>
 
     <script>
@@ -102,11 +102,13 @@
             btn.innerText = 'Detecting...';
             btn.disabled = true;
 
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
             try {
-                // Talk to Django backend
-                const response = await fetch('http://127.0.0.1:8000/api/predict/', {
+                // IMPORTANT: Replace the domain below with your actual Railway URL! Keep the /api/predict/ at the end.
+                const response = await fetch('/api/predict/', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json' , 'X-CSRFToken': csrfToken,},
                     body: JSON.stringify({ text: inputText }),
                 });
 
@@ -122,6 +124,7 @@
             } catch (err) {
                 errorBox.innerText = 'Failed to connect to the backend server. Is Django running?';
                 errorBox.style.display = 'block';
+                console.error(err);
             } finally {
                 // Revert button state
                 btn.innerText = 'Detect Language';
