@@ -1,7 +1,4 @@
 from operator import index
-from turtle import home
-
-from django import views
 from django.urls import path
 from . import views
 
